@@ -1,7 +1,5 @@
 var express = require('express');
 var http = require('http');
-var arr = require('./compilers');
-var sandBox = require('./DockerSandbox');
 var bodyParser = require('body-parser');
 var app = express();
 var server = http.createServer(app);
