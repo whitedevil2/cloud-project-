@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var sandBox = require('./DockerSandbox');
 var http = require('http');
-var arr = require('./compilers');
 var result;
 
 router.all('*', function(req, res, next) 
