@@ -3,12 +3,12 @@ var http = require('http');
 var bodyParser = require('body-parser');
 var app = express();
 var server = http.createServer(app);
-var port=3000;
+var port = 3000;
 var fs  = require('fs');
-var result;
+var spawn = require('child_process').spawn;
 
 var ExpressBrute = require('express-brute');
-var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
+var store = new ExpressBrute.MemoryStore();
 var bruteforce = new ExpressBrute(store,{
     freeRetries: 50,
     lifetime: 3600
@@ -17,102 +17,73 @@ var bruteforce = new ExpressBrute(store,{
 app.use(express.static(__dirname));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.all('*', function(req, res, next) 
-{
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+app.all('*', function(_, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
 
-    next();
+  next();
 });
 
-function random(size) {
-    //returns a crypto-safe random
-    return require("crypto").randomBytes(size).toString('hex');
-}
+app.post('/compile', bruteforce.prevent, (req, res) => {
 
+  let { language, code, stdin } = req.body;
+  let cmd, stdout = "", stderr = "";
 
-app.post('/compile',bruteforce.prevent,function(req, res) 
-{
+  if (language == 0) {
 
-    var language = req.body.language;
-  var code = req.body.code;
-  var stdin = req.body.stdin;
- 
-  if(language==0){
-    //create a cpp file
-    fs.writeFile("code.cpp",  code, function(err){
-      if(err){
+    // Create a C++ file with the code
+    fs.writeFile("submission_dir/code.cpp", code, (err) => {
+      if (err) {
         console.log(err);
-      } else{
+      } else {
         console.log("The file is saved!");
       }
-    })
+    });
 
-    //executing the code
-  var spawn = require('child_process').spawn,
-  cmd  = spawn('g++', ["./code.cpp"]);
+    cmd = spawn('g++', ["./submission_dir/code.cpp"]);
+ } else {
 
-  cmd.stdout.on('data', function (data) {
+    // Create a Python file with the code
+    fs.writeFile("submission_dir/code.py", code, (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("The file is saved!");
+      }
+    });
+
+    cmd  = spawn('python', ["./submission_dir/code.py", stdin]);
+  }
+
+  cmd.stdout.on('data', (data) => {
     console.log('stdout: ' + data.toString());
-    result=data.toString();
+    stdout = data.toString();
   });
 
-  cmd.stderr.on('data', function (data) {
+  cmd.stderr.on('data', (data) => {
     console.log('stderr: ' + data.toString());
-    result=data.toString();
-  });
-
-  cmd.on('exit', function (code) {
-    console.log('child process exited with code ' + code.toString());
-
-  });
-
-    console.log(result);
-  res.send({output:result, langid: language,code:code});
-
- }
- else{
-  fs.writeFile("code.py",  code, function(err){
-    if(err){
-      console.log(err);
-    } else{
-      console.log("The file is saved!");
-    }
-  })
-
-  //executing the code
-  var spawn = require('child_process').spawn,
-  cmd  = spawn('python', ["./code.py", stdin]);
-
-  cmd.stdout.on('data', function (data) {
-    console.log('stdout: ' + data.toString());
-    result=data.toString();
-  });
-
-  cmd.stderr.on('data', function (data) {
-    console.log('stderr: ' + data.toString());
-    result=data.toString();
+    stderr = data.toString();
   });
 
   cmd.on('exit', function (code) {
     console.log('child process exited with code ' + code.toString());
   });
 
-  console.log(result);
-  res.send({output:result, langid: language,code:code});
- }
+  let result = (stderr === "") ? stdout : stderr;
 
-   
+  res.send({
+    output: result,
+    langid: language,
+    code: code
+  });
 });
 
-
-app.get('/', function(req, res) 
-{
-    res.sendfile(`${__dirname}/views/index.html`);
+app.get('/', function(_, res) {
+  res.sendfile(`${__dirname}/views/index.html`);
 });
 
-console.log("Listening at "+port)
+console.log("Listening at " + port);
 server.listen(port);
 
-module.exports=app;
+module.exports = app;
