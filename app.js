@@ -7,13 +7,6 @@ var port = 3000;
 var fs  = require('fs');
 var spawn = require('child_process').spawn;
 
-var ExpressBrute = require('express-brute');
-var store = new ExpressBrute.MemoryStore();
-var bruteforce = new ExpressBrute(store,{
-    freeRetries: 50,
-    lifetime: 3600
-});
-
 app.use(express.static(__dirname));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -25,7 +18,7 @@ app.all('*', function(_, res, next) {
   next();
 });
 
-app.post('/compile', bruteforce.prevent, (req, res) => {
+app.post('/compile', (req, res) => {
 
   let { language, code, stdin } = req.body;
   let cmd, stdout = "", stderr = "";
