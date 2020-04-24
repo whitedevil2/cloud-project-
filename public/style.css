@@ -1,0 +1,32 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+label {
+  width: 200px;
+  display: inline-block;
+  float: left;
+}
+
+input,
+textarea {
+  display: inline-block;
+}
+
+.output {
+  font-family: monospace;
+  white-space: pre-line;
+  border: 1px solid #ccc;
+  background: #eee;
+  min-height: 50px;
+}
+
+h3 {
+  margin-top: 0;
+  padding: 0;
+}
