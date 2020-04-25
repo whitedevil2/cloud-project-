@@ -5,7 +5,9 @@ var app = express();
 var server = http.createServer(app);
 var port = 3000;
 var fs  = require('fs');
-var spawn = require('child_process').spawn;
+const Promise = require('bluebird');
+const cmd = require('node-cmd');
+const getAsync = Promise.promisify(cmd.get, { multiArgs: true, context: cmd })
 
 app.use(express.static(__dirname));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,58 +20,52 @@ app.all('*', function(_, res, next) {
   next();
 });
 
-app.post('/compile', (req, res) => {
+app.post('/compile', async (req, res) => {
 
   let { language, code, stdin } = req.body;
-  let cmd, stdout = "", stderr = "";
+  let cmd, cleanCmd, output = "", error = "";
 
   if (language == 0) {
-
-    // Create a C++ file with the code
+    // C++
     fs.writeFile("submission_dir/code.cpp", code, (err) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log("The file is saved!");
       }
     });
 
-    cmd = spawn('g++', ["./submission_dir/code.cpp"]);
- } else {
-
-    // Create a Python file with the code
+    cmd = 'g++ ./submission_dir/code.cpp && ./a.out';
+    cleanCmd = 'rm a.out submission_dir/code.cpp';
+  } else {
+    // Python
     fs.writeFile("submission_dir/code.py", code, (err) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log("The file is saved!");
       }
     });
 
-    cmd  = spawn('python', ["./submission_dir/code.py", stdin]);
+    cmd = 'python ./submission_dir/code.py';
+    cleanCmd = 'rm submission_dir/code.py';
   }
 
-  cmd.stdout.on('data', (data) => {
-    console.log('stdout: ' + data.toString());
-    stdout = data.toString();
-  });
-
-  cmd.stderr.on('data', (data) => {
-    console.log('stderr: ' + data.toString());
-    stderr = data.toString();
-  });
-
-  cmd.on('exit', function (code) {
-    console.log('child process exited with code ' + code.toString());
-  });
-
-  let result = (stderr === "") ? stdout : stderr;
+  try {
+    let execErr;
+    [output, execErr] = await getAsync(cmd);
+    output += "\n" + execErr;
+  } catch (err) {
+    error = err.toString();
+  }
 
   res.send({
-    output: result,
-    langid: language,
-    code: code
+    output,
+    error
   });
+
+  // Remove the created files once finished executing
+  try {
+    await getAsync(cleanCmd);
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 app.get('/', function(_, res) {
