@@ -1,0 +1,61 @@
+#editor { 
+    position: relative;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height:100%; 
+    width: 1500px;
+    align-self: center;
+}
+
+#editor-container {
+    display: grid ;
+    grid-template-rows: 1fr auto;
+}
+
+.button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;                
+}
+
+.buttonContainer{
+    align-self: center;
+    padding: left 750px; ;
+}
+
+body {
+    background: black;
+    margin-left: 10px;
+    height: 100%;
+    padding-left: 10px;
+}
+
+p {
+    color: red;
+}
+
+h3{
+    text-align: center;
+    font-style: initial;
+}
+
+textarea {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    border: 2px solid #74637f;
+    border-radius: 0;
+    color: #444;
+    background-color: transparent;
+    overflow: auto;
+    resize: none;
+    transition: transform 1s;
+}
