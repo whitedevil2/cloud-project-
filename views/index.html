@@ -28,13 +28,6 @@
                 </select>
                 <br/><br><br>
 
-                <!-- creating box for stdin -->
-
-                <label>Standard Input:</label>
-                <br>
-                <textarea name="the-textarea" id="stdin" maxlength="500" placeholder="Type your input here"autofocus></textarea>
-                <br><br><br>
-
                 <!--compile button-->
 
                 <div class="buttonContainer">
@@ -55,11 +48,18 @@
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
+        <script src="../js/ace.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript">
-            // Show language codes to user on clicking help link
-            $('#langhelp').on('click', () => {
-                let msg = "0: C/C++ \n 1: Python";
-                alert(msg);
+            var editor = ace.edit("editor");
+
+            $("#language").change(() => {
+                let language = $('#language').val();
+                console.log(language);
+                if (language === "cpp") {
+                    editor.session.setMode("ace/mode/c_cpp");
+                } else if (language === "python") {
+                    editor.session.setMode("ace/mode/python");
+                }
             });
 
             // Compile user code
@@ -75,10 +75,7 @@
                     document.getElementById("output").innerHTML = "Output: " + data.output + data.error;
                 });
             });
-        </script>
-        <script src="../js/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script>
-            var editor = ace.edit("editor");
+
             editor.setTheme("ace/theme/twilight");
             editor.session.setMode("ace/mode/c_cpp");
         </script>
