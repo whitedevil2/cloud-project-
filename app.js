@@ -25,7 +25,7 @@ app.post('/compile', async (req, res) => {
   let { language, code, stdin } = req.body;
   let cmd, cleanCmd, output = "", error = "";
 
-  if (language == "cpp") {
+  if (language === "cpp") {
     // C++
     fs.writeFile("submission_dir/code.cpp", code, (err) => {
       if (err) {
