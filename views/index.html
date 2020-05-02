@@ -1,7 +1,7 @@
 <html>
     <head>
-       
-        <title>Compiler box</title>  
+
+        <title>Compiler box</title>
         <link rel="stylesheet" href="../css/style.css">
          <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -10,68 +10,56 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
         <!-- Latest compiled JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> 
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     </head>
 
     <body>
-        
+
         <div class="rows">
             <div class="col-sm-4" style="height: 100%; align-content: center;">
                 <h3>Compiler Box</h3>
                 <br><br>
                 <!-- getting the id of the language -->
                 <label for="language">Choose a language:</label>
-        
+
                 <select id="language">
                   <option value="cpp">C++</option>
                   <option value="python">Python</option>
-                </select> 
+                </select>
                 <br/><br><br>
 
-                <!-- creating box for stdin -->
-                    
-                <label>Standard Input:</label>
-                <br>
-                <textarea name="the-textarea" id="stdin" maxlength="500" placeholder="Type your input here"autofocus></textarea>
-                <br><br><br>
-                    
                 <!--compile button-->
-                    
+
                 <div class="buttonContainer">
                 <input type="button" class="button" value="Compile" id="send">
                 <br><br><br>
                 </div>
-                    
-                <!-- output box -->    
-                <p class="output" id="output">Output appears here</p>
-                    
+
+                <!-- output box -->
+                <p class="output" id="output">Output:</p>
+
 
             </div>
                 <div id="editorContainer" class="col-sm-8" style="height: 100%;">
-                    <div id="editor">#include&lt;iostream&gt;
-                        using namespace std;
-                        int main(){
-                            cout<<"Hello World";
-                        }
-                    </div>
+                    <div id="editor"></div>
                 </div>
         </div>
-            
-        
-
-        
         <br/>
 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
-          
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>    
-        
+        <script src="../js/ace.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript">
-            // Show language codes to user on clicking help link
-            $('#langhelp').on('click', () => {
-                let msg = "0: C/C++ \n 1: Python";
-                alert(msg);
+            var editor = ace.edit("editor");
+
+            $("#language").change(() => {
+                let language = $('#language').val();
+                console.log(language);
+                if (language === "cpp") {
+                    editor.session.setMode("ace/mode/c_cpp");
+                } else if (language === "python") {
+                    editor.session.setMode("ace/mode/python");
+                }
             });
 
             // Compile user code
@@ -79,20 +67,17 @@
                 var language = $('#language').val();
                 var code = editor.getValue();
                 var stdin = $('#stdin').val();
-                // Pass the json file to the page 
+                // Pass the json file to the page
                 var json = { code, stdin, language};
                 console.log(json);
 
                 $.post("/compile", json, function(data, error, xhr) {
-                    document.getElementById("output").innerHTML = "Output: " + data.output;
+                    document.getElementById("output").innerHTML = "Output: " + data.output + data.error;
                 });
             });
-        </script>
-        <script src="../js/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script>
-            var editor = ace.edit("editor");
+
             editor.setTheme("ace/theme/twilight");
             editor.session.setMode("ace/mode/c_cpp");
-</script>
+        </script>
     </body>
 </html>
